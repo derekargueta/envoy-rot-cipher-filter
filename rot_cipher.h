@@ -26,6 +26,8 @@ public:
 private:
   StreamDecoderFilterCallbacks* decoder_callbacks_;
 
+  std::string rotateText(std::string text);
+
   int rot_value_;
   std::string rot_header_;
 };
