@@ -61,6 +61,8 @@ v2 Example
   - name: envoy.router
 ```
 
+Full example configurations are in the `examples/` directory.
+
 
 ## Filter Development
 
