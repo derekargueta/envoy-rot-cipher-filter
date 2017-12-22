@@ -8,3 +8,7 @@ compile: compile/proto
 
 test:
 	bazel test //:rot_cipher_integration_test
+
+clean:
+	rm -rf gen/*
+	rm -rf bazel-*
