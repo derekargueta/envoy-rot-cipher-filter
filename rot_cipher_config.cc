@@ -30,18 +30,7 @@ HttpFilterFactoryCb RotCipherConfig::createFilterFactoryFromProto(const Protobuf
                                                    const std::string&,
                                                    FactoryContext&) {
   
-  std::cout << "wat" << std::endl;
-  example::RotCipher typed_config; // = dynamic_cast<const example::RotCipher&>(proto_config);
-  typed_config.CopyFrom(proto_config);
-  std::cout << "no way" << std::endl;
-
-  // const google::protobuf::Reflection* reflection = proto_config.GetReflection();
-  // const google::protobuf::Descriptor* descriptor = proto_config.GetDescriptor();
-  // const google::protobuf::FieldDescriptor* value_field = descriptor->FindFieldByName("rot_value");
-  // const google::protobuf::FieldDescriptor* header_field = descriptor->FindFieldByName("rot_header");
-  // auto idk = &proto_config;
-  // std::string rot_header = reflection->GetString(*idk, header_field)
-  // int rot_value = reflection->GetInt32(*proto_config, value_field)
+  const auto& typed_config = dynamic_cast<const example::RotCipher&>(proto_config);
 
   return [typed_config](Http::FilterChainFactoryCallbacks& callbacks) -> void {
     callbacks.addStreamDecoderFilter(
