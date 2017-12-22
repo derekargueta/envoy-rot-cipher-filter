@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package example;
+
+message RotCipher {
+  int32 rot_value = 1;
+  string rot_header = 2;
+}

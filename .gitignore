@@ -1,0 +1,6 @@
+# protobuf
+gen/
+
+# misc
+.DS_Store
+a.out
