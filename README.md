@@ -1,7 +1,9 @@
 Envoy Rot Cipher Filter
 ===========================
 
-A simple and filter that probably isn't of much production value, but demonstrates how to write a third-party Envoy filter that is compatible with both the v1 and v2 API. I hope that this repository serves as a nice guide for people who maybe don't want to dive into the internals of Envoy too deeply, but want to be able to build custom Envoy filters _outside_ of the main source code.
+A simple filter that probably (hopefully) isn't of much production value, but demonstrates how to write a third-party Envoy filter that is compatible with both the v1 and v2 API. I hope that this repository serves as a nice guide for people who maybe don't want to dive into the internals of Envoy too deeply, but want to be able to build custom Envoy filters _outside_ of the main source code.
+
+I wanted to write this because the current defacto example doesn't use any configuration data, which is one of the parts I wrestled with the most in building this filter.
 
 FYI The code here is not the greatest and isn't meant to be, but I do plan on coming back here and cleaning up somewhat.
 
@@ -59,9 +61,15 @@ v2 Example
 
 ## Filter Development
 
+Every filter has 2 main components:
+- The config, which for HTTP filters should be a subclass of `NamedHttpFilterConfigFactory`
+- The filter implementation, which for HTTP filters would be a subclass of either `StreamDecoderFilter`, `StreamEncoderFilter`, or `StreamFilter` for filters that do encoding and decoding.
+
+To support the v2 API, you'll additionally need a `.proto` file. Simply put, if your config is v1, then Envoy will call the FilterConfig constructor with a `Json::Object` which you can then pick apart and validate. If your config is v2, then it will call the FilterConfig constructor with a `Protobuf::Message`, which you can just cast to your protobuf-generated class. The details of how/why this procedure works is worthy of a separate write-up, but I believe has a lot to do with how the v2 API can use gRPC streaming.
+
 I started with `rot_cipher.proto` to define what the configuration would look like.
-That file the produces `rot_cipher.pb.(cc|h)` in `gen/`.
-This is a pretty ad-hoc procedure, and quite frankly the bazel `BUILD` file could be improved to use the native Bazel support for protobufs instead of calling the protobuf compiler in the `Makefile`.
+That file then produces `rot_cipher.pb.(cc|h)` in `gen/`.
+This is a pretty ad-hoc procedure that I constructed, and quite frankly the bazel `BUILD` file could be improved to use the native Bazel support for protobufs instead of calling the protobuf compiler in the `Makefile`.
 
 
 _But is using a `.proto` necessary?_
@@ -69,7 +77,7 @@ _But is using a `.proto` necessary?_
 _For the v2 API, yes. You might be able to hack something weird using [Protobuf Reflection](https://developers.google.com/protocol-buffers/docs/reference/cpp/google.protobuf.message#Reflection) but that's a scary path._
 
 
-After wrapping my head around how the protobufs integrate into Envoy filter configs, the rest was pretty straight forward to achieve. Some important classes to look at are [HeaderMap](https://github.com/envoyproxy/envoy/blob/master/include/envoy/http/header_map.h), 
+After wrapping my head around how the protobufs integrate into Envoy filter configs (first-time protobuf user here), the rest was pretty straight forward to achieve based on the [envoy-filter-example](https://github.com/envoyproxy/envoy-filter-example). Some important classes to look at are [HeaderMap](https://github.com/envoyproxy/envoy/blob/master/include/envoy/http/header_map.h) for manipulating headers and [Object](https://github.com/envoyproxy/envoy/blob/master/include/envoy/json/json_object.h) for manipulating Json Objects. Additionally, [json_loader.cc](https://github.com/envoyproxy/envoy/blob/master/source/common/json/json_loader.cc), [config/utility.h](https://github.com/envoyproxy/envoy/blob/master/source/common/config/utility.h), and [protobuf/utility.h](https://github.com/envoyproxy/envoy/blob/master/source/common/protobuf/utility.h) were pretty helpful.
 
 ## Problems I ran Into
 
@@ -170,3 +178,5 @@ This was mostly an exercise in gaining familiarity with Envoy filter development
 - The organization of the Envoy made it a little difficult to piece this project together. For example, _all_ the Envoy filter configs are in one directoy, and _all_ the Envoy filter implementations are in a different directory, etc. instead of having the code organized by module where each module has all of its pieces in one directory. This organization makes sense for the size of Envoy's project, but again makes it difficult to piece together everything that, for example, the buffer filter does.
 - Despite the above 2 "complaints", Envoy does provide a very clean API to work with. I found this to be a much easier exercise than implementing an Nginx module, which took a day-long workshop and I'm still not confident in my Nginx module development.
 - I noticed there's some scripts in `envoy/tools/` such as `stack_decode.py` that may have been helpful in debugging but I couldn't figure out how to get them to work.
+- The bazel build procedure is pretty slick. Props to the Envoy team!
+- If you want to write Envoy filters, you can't shy away from reading a lot of C++ :)
