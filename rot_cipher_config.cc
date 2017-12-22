@@ -39,7 +39,8 @@ HttpFilterFactoryCb RotCipherConfig::createFilterFactoryFromProto(const Protobuf
 }
 
   
-
+// this is required for the filter to get registered with the Http connection
+// manager, though I'm not sure how the internals of this works.
 static Registry::RegisterFactory<RotCipherConfig, NamedHttpFilterConfigFactory> register_;
 
 } // Configuration

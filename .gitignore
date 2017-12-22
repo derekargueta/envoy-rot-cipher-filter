@@ -1,5 +1,5 @@
 # protobuf
-gen/
+gen/*.pb.h
 
 bazel-*
 

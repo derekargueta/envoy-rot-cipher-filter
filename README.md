@@ -3,9 +3,12 @@ Envoy Rot Cipher Filter
 
 A simple filter that probably (hopefully) isn't of much production value, but demonstrates how to write a third-party Envoy filter that is compatible with both the v1 and v2 API. I hope that this repository serves as a nice guide for people who maybe don't want to dive into the internals of Envoy too deeply, but want to be able to build custom Envoy filters _outside_ of the main source code.
 
-I wanted to write this because the current defacto example doesn't use any configuration data, which is one of the parts I wrestled with the most in building this filter.
+I wanted to write this because the [current defacto example](https://github.com/envoyproxy/envoy-filter-example) doesn't use any configuration data, which is one of the parts I wrestled with the most in building this filter. As a young whippersnapper new-grad, I thought that this "outside perspective" might be helpful for others getting started with C++/Envoy development.
 
 FYI The code here is not the greatest and isn't meant to be, but I do plan on coming back here and cleaning up somewhat.
+
+If you don't understand the explanations here, please open an issue/PR.
+Also, the filter's source code should be well-documented (actually over-documented) to provide further explanations.
 
 
 ## Compiling & Running
