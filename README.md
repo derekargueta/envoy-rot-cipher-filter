@@ -106,7 +106,7 @@ const auto& typed_config = dynamic_cast<const example::RotCipher&>(proto_config)
 All generated protobuf messages subclass `Protobuf::Message` (which is the type of `proto_config`) so this dynamic cast shouldn't be a problem. I actually found this snippet in the [Envoy source](https://github.com/envoyproxy/envoy/blob/bbe6618b90d87500e7ed4304996881c4be4abb09/source/common/protobuf/utility.h#L149).
 
 I had gone over the configuration multiple times and knew it was correct based on playing with other filters.
-At the end my wits, I started throwing print statements into the Envoy source code.
+At the end my wits, I started throwing print statements into the Envoy source code, thinking maybe there was a bug somewhere in the JSON parsing?
 I started with the `HttpConnectionManagerConfig` right after it logs what filter it's processing, since the debug log kindly outputs what line it is at :)
 This is at the [end of the constructor](https://github.com/envoyproxy/envoy/blob/9ed62923a8ff6745407046c4451ce757348d966f/source/server/config/network/http_connection_manager.cc#L221) which has the following code.
 
@@ -138,7 +138,7 @@ for (int32_t i = 0; i < filters.size(); i++) {
 
 ```
 
-I inspected the `filter_config` JSON object and it had the `rot_value` and `rot_header`, so then I looked inside the call to `Config::Utility::translateToFactoryConfig(...)` which contains the following code.
+I inspected the `filter_config` JSON object and it had the `rot_value` and `rot_header` as expected, so then I looked inside the call to [`Config::Utility::translateToFactoryConfig(...)`](https://github.com/envoyproxy/envoy/blob/6b2823da5006e92bc4b365e9e8804a4f6a2eba37/source/common/config/utility.h#L190) which contains the following code.
 
 ```cpp
 template <class ProtoMessage, class Factory>
@@ -159,7 +159,7 @@ static ProtobufTypes::MessagePtr translateToFactoryConfig(const ProtoMessage& en
 }
 ```
 
-WAIT. `createEmptyConfigProto`? I hadn't thought much of that function and just pasted what the `envoy-example-filter` code had, which is `return ProtobufTypes::MessagePtr{new Envoy::ProtobufWkt::Empty()}`. If the empty message is _not_ of type `example::RotCipher`, then yeah there would be issues in casting it to a `Protobuf::Message` and then to an `example::RotCipher`. I checked some built-in Envoy filters that had non-emtpy configurations and sure enough, they return an empty instance of the generated protobuf config.
+I wasn't getting the nullptr error message so the config wasn't coming back null... WAIT. `createEmptyConfigProto`? That function is required by the abstract class and I remember pasting in some code for it... I hadn't thought much of that function and just pasted what the `envoy-example-filter` code had, which is `return ProtobufTypes::MessagePtr{new Envoy::ProtobufWkt::Empty()}`. If the empty message is _not_ of type `example::RotCipher`, then yeah there would be issues in casting it to a `Protobuf::Message` and then to an `example::RotCipher`. I checked some built-in Envoy filters that had non-emtpy configurations and sure enough, they return an empty instance of the generated protobuf config.
 
 RateLimit config
 ```cpp
@@ -175,7 +175,7 @@ ProtobufTypes::MessagePtr createEmptyConfigProto() override {
 }
 ```
 
-all was well!
+all was well! The error message was a little cryptic (yet correct), but sure enough it was a user-error.
 
 ## Thoughts/Reflections
 
