@@ -22,6 +22,7 @@ envoy_cc_library(
     hdrs = ["rot_cipher.h"],
     repository = "@envoy",
     deps = [
+        "//gen:rot_cipher_protos",
         "@envoy//source/exe:envoy_common_lib",
     ],
 )
@@ -29,8 +30,10 @@ envoy_cc_library(
 envoy_cc_library(
     name = "rot_cipher_config",
     srcs = ["rot_cipher_config.cc"],
+    hdrs = ["rot_cipher_config.h"],
     repository = "@envoy",
     deps = [
+        "//gen:rot_cipher_protos",
         ":rot_cipher_lib",
         "@envoy//source/exe:envoy_common_lib",
     ],
@@ -42,6 +45,7 @@ envoy_cc_test(
     data = [":envoy.conf"],
     repository = "@envoy",
     deps = [
+        "//gen:rot_cipher_protos",
         ":rot_cipher_config",
         "@envoy//test/integration:http_integration_lib"
     ],

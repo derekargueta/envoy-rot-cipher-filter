@@ -25,7 +25,7 @@ public:
 
   std::string name() override { return "rot_cipher"; }
 
-}
+};
 
 } // Configuration
 } // Server

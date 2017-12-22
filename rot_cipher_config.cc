@@ -13,8 +13,8 @@ namespace Envoy {
 namespace Server {
 namespace Configuration {
 
-HttpFilterFactoryCb RotCipherFilterConfig::createFilterFactory(const Json::Object&, const std::string&,
-                                          FactoryContext&) override {
+HttpFilterFactoryCb RotCipherConfig::createFilterFactory(const Json::Object&, const std::string&,
+                                          FactoryContext&) {
 
   // in this example we manually parse the JSON since it's one field. In the
   // official Envoy source they write "translation" functions. See
@@ -25,11 +25,11 @@ HttpFilterFactoryCb RotCipherFilterConfig::createFilterFactory(const Json::Objec
   };
 }
 
-HttpFilterFactoryCb RotCipherFilterConfig::createFilterFactoryFromProto(const Protobuf::Message& proto_config,
+HttpFilterFactoryCb RotCipherConfig::createFilterFactoryFromProto(const Protobuf::Message& proto_config,
                                                    const std::string&,
-                                                   FactoryContext&) override {
+                                                   FactoryContext&) {
   
-  const auto& typed_config = dynamic_cast<example::RotCipher>(proto_config);
+  const auto& typed_config = dynamic_cast<const example::RotCipher&>(proto_config);
   
   return [typed_config](Http::FilterChainFactoryCallbacks& callbacks) -> void {
     callbacks.addStreamDecoderFilter(
@@ -39,7 +39,7 @@ HttpFilterFactoryCb RotCipherFilterConfig::createFilterFactoryFromProto(const Pr
 
   
 
-static Registry::RegisterFactory<RotCipherFilterConfig, NamedHttpFilterConfigFactory> register_;
+static Registry::RegisterFactory<RotCipherConfig, NamedHttpFilterConfigFactory> register_;
 
 } // Configuration
 } // Server

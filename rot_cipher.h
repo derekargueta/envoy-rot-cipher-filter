@@ -13,9 +13,10 @@ class RotCipherFilter : public StreamDecoderFilter {
 public:
   RotCipherFilter();
   RotCipherFilter(example::RotCipher);
+  RotCipherFilter(const Json::Object&);
   ~RotCipherFilter();
 
-  void onDestory() override;
+  void onDestroy() override;
 
   FilterHeadersStatus decodeHeaders(HeaderMap& headers, bool) override;
   FilterDataStatus decodeData(Buffer::Instance&, bool) override;
