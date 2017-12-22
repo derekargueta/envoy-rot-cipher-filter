@@ -85,7 +85,7 @@ I had an issue with the v2 API config where each time I tried to start Envoy I g
 
 I had managed to narrow it down to this line in my code:
 
-```
+```cpp
 const auto& typed_config = dynamic_cast<const example::RotCipher&>(proto_config);
 ```
 
@@ -96,7 +96,7 @@ At the end my wits, I started throwing print statements into the Envoy source co
 I started with the HTTPConnectionManager right after it logs what filter it's processing, since the debug log kindly outputs what line it is at :)
 This is at the end of the constructor, `HttpConnectionManagerConfig::HttpConnectionManagerConfig(const envoy::api::v2::filter::network::HttpConnectionManager&, FactoryContext&, Http::DateProvider&, Router::RouteConfigProviderManager&)` which has the following code.
 
-```
+```cpp
 const auto& filters = config.http_filters();
 for (int32_t i = 0; i < filters.size(); i++) {
   const ProtobufTypes::String& string_name = filters[i].name();
@@ -126,7 +126,7 @@ for (int32_t i = 0; i < filters.size(); i++) {
 
 I inspected the `filter_config` JSON object and it had the `rot_value` and `rot_header`, so then I looked inside the call to `Config::Utility::translateToFactoryConfig(...)` which contains the following code.
 
-```
+```cpp
 template <class ProtoMessage, class Factory>
 static ProtobufTypes::MessagePtr translateToFactoryConfig(const ProtoMessage& enclosing_message,
                                                           Factory& factory) {
@@ -148,14 +148,14 @@ static ProtobufTypes::MessagePtr translateToFactoryConfig(const ProtoMessage& en
 WAIT. `createEmptyConfigProto`? I hadn't thought much of that function and just pasted what the `envoy-example-filter` code had, which is `return ProtobufTypes::MessagePtr{new Envoy::ProtobufWkt::Empty()}`. If the empty message is _not_ of type `example::RotCipher`, then yeah there would be issues in casting it to a `Protobuf::Message` and then to an `example::RotCipher`. I checked some built-in Envoy filters that had non-emtpy configurations and sure enough, they return an empty instance of the generated protobuf config.
 
 RateLimit config
-```
+```cpp
 ProtobufTypes::MessagePtr createEmptyConfigProto() override {
   return ProtobufTypes::MessagePtr{new envoy::api::v2::filter::http::RateLimit()};
 }
 ```
 
 So once I changed the RotCipher config's `createEmtpyConfigProto` to 
-```
+```cpp
 ProtobufTypes::MessagePtr createEmptyConfigProto() override {
   return ProtobufTypes::MessagePtr{new example::RotCipher()};
 }
