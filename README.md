@@ -90,7 +90,7 @@ _For the v2 API, yes. You might be able to hack something weird using [Protobuf 
 
 After wrapping my head around how the protobufs integrate into Envoy filter configs (first-time protobuf user here), the rest was pretty straight forward to achieve based on the [envoy-filter-example](https://github.com/envoyproxy/envoy-filter-example). Some important classes to look at are [HeaderMap](https://github.com/envoyproxy/envoy/blob/master/include/envoy/http/header_map.h) for manipulating headers and [Object](https://github.com/envoyproxy/envoy/blob/master/include/envoy/json/json_object.h) for manipulating Json Objects. Additionally, [json_loader.cc](https://github.com/envoyproxy/envoy/blob/master/source/common/json/json_loader.cc), [config/utility.h](https://github.com/envoyproxy/envoy/blob/master/source/common/config/utility.h), and [protobuf/utility.h](https://github.com/envoyproxy/envoy/blob/master/source/common/protobuf/utility.h) were pretty helpful.
 
-As an aside, before starting this filter I went through the [Protobuf C++ Tutorial](https://developers.google.com/protocol-buffers/docs/cpptutorial), substituting proto2 syntax for proto3.
+As an aside, before starting this filter I went through the [Protobuf C++ Tutorial](https://developers.google.com/protocol-buffers/docs/cpptutorial), substituting proto3 syntax for proto2.
 
 ## Problems I ran Into
 (this part is still kind of mumble-y and under revision)
