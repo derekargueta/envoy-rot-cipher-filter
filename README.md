@@ -1,10 +1,50 @@
 Envoy Rot Cipher Filter
 ===========================
 
-A simple and filter that probably isn't of much production value, but demonstrates how to write a third-party Envoy filter that is compatible with both the v1 and v2 API.
+A simple and filter that probably isn't of much production value, but demonstrates how to write a third-party Envoy filter that is compatible with both the v1 and v2 API. I hope that this repository serves as a nice guide for people who maybe don't want to dive into the internals of Envoy too deeply, but want to be able to build custom Envoy filters _outside_ of the main source code.
+
+FYI The code here is not the greatest and isn't meant to be, but I do plan on coming back here and cleaning up somewhat.
+
+
+## Compiling & Running
+```bash
+git submodule update --init  # we need the envoy source to compile/test
+make compile
+```
+
+The `compile` target should call the `compile/proto` target to generate the protobuf classes in the `gen/` directory.
+
+I've included a basic `app.py` web server that just prints the headers it receives. To run the whole thing:
+
+terminal pane 1:
+```bash
+./bazel-bin/envoy -c examples/example.v2.yaml --v2-config-only
+```
+
+terminal pane 2:
+```
+python examples/app.py
+```
+
+terminal pane 3:
+```
+curl -H "x-rot: asdf" localhost:8000
+```
+
+and in pane 2 you should see something like
+```
+user-agent: curl/7.54.0
+accept: */*
+x-forwarded-proto: http
+x-request-id: 5a16b07d-d811-4fdf-b9bc-790efdd1d97b
+x-rot: nopq
+content-length: 0
+```
+where you can see the letters of `x-rot` have been rotated.
+
 
 ## Usage
-It accepts two configuration options:
+This filter accepts two configuration options:
 - `rot_value`: an integer describing how much to rotate each letter by. For example, 13 would be the classic Caesar Cipher
 - `rot_header`: a string that names which header to apply the cipher to. If the header is not found, no action is taken and the filter continues.
 
@@ -105,7 +145,7 @@ static ProtobufTypes::MessagePtr translateToFactoryConfig(const ProtoMessage& en
 }
 ```
 
-WAIT. `createEmptyConfigProto`? I hadn't thought much of that function and just pasted what the `envoy-example-filter` code had, which is `ProtobufTypes::MessagePtr{new Envoy::ProtobufWkt::Empty()}`. If the original message is _not_ of type `example::RotCipher`, then yeah there would be issues in casting it to a `Protobuf::Message` and then to an `example::RotCipher`. I checked some built-in Envoy filters that had non-emtpy configurations and sure enough, they return an empty instance of the generated protobuf config.
+WAIT. `createEmptyConfigProto`? I hadn't thought much of that function and just pasted what the `envoy-example-filter` code had, which is `return ProtobufTypes::MessagePtr{new Envoy::ProtobufWkt::Empty()}`. If the empty message is _not_ of type `example::RotCipher`, then yeah there would be issues in casting it to a `Protobuf::Message` and then to an `example::RotCipher`. I checked some built-in Envoy filters that had non-emtpy configurations and sure enough, they return an empty instance of the generated protobuf config.
 
 RateLimit config
 ```
@@ -116,8 +156,12 @@ ProtobufTypes::MessagePtr createEmptyConfigProto() override {
 
 So once I changed the RotCipher config's `createEmtpyConfigProto` to 
 ```
-
+ProtobufTypes::MessagePtr createEmptyConfigProto() override {
+  return ProtobufTypes::MessagePtr{new example::RotCipher()};
+}
 ```
+
+all was well!
 
 ## Thoughts/Reflections
 
@@ -125,3 +169,4 @@ This was mostly an exercise in gaining familiarity with Envoy filter development
 - There is very little internal documentation of how the mechanics work. This is no secret, but the documentation from Envoy could use some love and help from the community (low-hanging fruit for new Envoy contributors!)
 - The organization of the Envoy made it a little difficult to piece this project together. For example, _all_ the Envoy filter configs are in one directoy, and _all_ the Envoy filter implementations are in a different directory, etc. instead of having the code organized by module where each module has all of its pieces in one directory. This organization makes sense for the size of Envoy's project, but again makes it difficult to piece together everything that, for example, the buffer filter does.
 - Despite the above 2 "complaints", Envoy does provide a very clean API to work with. I found this to be a much easier exercise than implementing an Nginx module, which took a day-long workshop and I'm still not confident in my Nginx module development.
+- I noticed there's some scripts in `envoy/tools/` such as `stack_decode.py` that may have been helpful in debugging but I couldn't figure out how to get them to work.
