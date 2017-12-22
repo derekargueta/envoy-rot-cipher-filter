@@ -24,6 +24,7 @@ static_resources:
                 route: { cluster: service }
           http_filters:
           - name: rot_cipher
+            config: { rot_value: 13, rot_header: x-rot }
           - name: envoy.router
   clusters:
   - name: service

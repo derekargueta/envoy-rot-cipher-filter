@@ -14,6 +14,7 @@ public:
   RotCipherFilter();
   RotCipherFilter(example::RotCipher);
   RotCipherFilter(const Json::Object&);
+  RotCipherFilter(int rot_value, std::string rot_header);
   ~RotCipherFilter();
 
   void onDestroy() override;

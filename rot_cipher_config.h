@@ -19,8 +19,12 @@ public:
                                                    const std::string&,
                                                    FactoryContext&) override;
 
+  // this is important! if you just use Envoy::ProtobufWkt::Empty()
+  // then the config won't be able to get cast to your protobuf type and you'll
+  // get an error message like:
+  // "Unable to parse JSON as proto (INVALID_ARGUMENT:: Cannot find field.):"
   ProtobufTypes::MessagePtr createEmptyConfigProto() override {
-    return ProtobufTypes::MessagePtr{new Envoy::ProtobufWkt::Empty()};
+    return ProtobufTypes::MessagePtr{new example::RotCipher()};
   }
 
   std::string name() override { return "rot_cipher"; }

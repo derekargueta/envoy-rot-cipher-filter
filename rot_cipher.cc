@@ -46,6 +46,9 @@ RotCipherFilter::RotCipherFilter(const Json::Object& config) {
   rot_header_ = config.getString("rot_header");
 }
 
+RotCipherFilter::RotCipherFilter(int rot_value, std::string rot_header) :
+    rot_value_(rot_value), rot_header_(rot_header) {}
+
 RotCipherFilter::~RotCipherFilter() {}
 
 void RotCipherFilter::onDestroy() {}
