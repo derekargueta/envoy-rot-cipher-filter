@@ -44,5 +44,5 @@ void RotCipherFilter::setDecoderFilterCallbacks(StreamDecoderFilterCallbacks& ca
   decoder_callbacks_ = &callbacks;
 }
 
-}
-}
+} // Http
+} // Envoy
