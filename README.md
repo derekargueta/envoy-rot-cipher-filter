@@ -70,6 +70,8 @@ Every filter has 2 main components:
 
 To support the v2 API, you'll additionally need a `.proto` file. Simply put, if your config is v1, then Envoy will call the FilterConfig constructor with a `Json::Object` which you can then pick apart and validate. If your config is v2, then it will call the FilterConfig constructor with a `Protobuf::Message`, which you can just cast to your protobuf-generated class. The details of how/why this procedure works is worthy of a separate write-up, but I believe has a lot to do with how the v2 API can use gRPC streaming.
 
+If you look at filters in the main Envoy source code they have a lot more pieces due to the complexity, for example they have intermediate `config` classes that the Json and protobuf data get converted to so that the filters only need 1 constructor. But if you strip it all down, these are the bare minimums.
+
 I started with `rot_cipher.proto` to define what the configuration would look like.
 That file then produces `rot_cipher.pb.(cc|h)` in `gen/`.
 This is a pretty ad-hoc procedure that I constructed, and quite frankly the bazel `BUILD` file could be improved to use the native Bazel support for protobufs instead of calling the protobuf compiler in the `Makefile`.
@@ -83,6 +85,7 @@ _For the v2 API, yes. You might be able to hack something weird using [Protobuf 
 After wrapping my head around how the protobufs integrate into Envoy filter configs (first-time protobuf user here), the rest was pretty straight forward to achieve based on the [envoy-filter-example](https://github.com/envoyproxy/envoy-filter-example). Some important classes to look at are [HeaderMap](https://github.com/envoyproxy/envoy/blob/master/include/envoy/http/header_map.h) for manipulating headers and [Object](https://github.com/envoyproxy/envoy/blob/master/include/envoy/json/json_object.h) for manipulating Json Objects. Additionally, [json_loader.cc](https://github.com/envoyproxy/envoy/blob/master/source/common/json/json_loader.cc), [config/utility.h](https://github.com/envoyproxy/envoy/blob/master/source/common/config/utility.h), and [protobuf/utility.h](https://github.com/envoyproxy/envoy/blob/master/source/common/protobuf/utility.h) were pretty helpful.
 
 ## Problems I ran Into
+(this part is still kind of mumble-y and under revision)
 
 I had an issue with the v2 API config where each time I tried to start Envoy I got the error below:
 ```
@@ -178,7 +181,7 @@ all was well!
 
 This was mostly an exercise in gaining familiarity with Envoy filter development so here's some thoughts on how the whole thing went.
 - There is very little internal documentation of how the mechanics work. This is no secret, but the documentation from Envoy could use some love and help from the community (low-hanging fruit for new Envoy contributors!)
-- The organization of the Envoy made it a little difficult to piece this project together. For example, _all_ the Envoy filter configs are in one directoy, and _all_ the Envoy filter implementations are in a different directory, etc. instead of having the code organized by module where each module has all of its pieces in one directory. This organization makes sense for the size of Envoy's project, but again makes it difficult to piece together everything that, for example, the buffer filter does.
+- The organization of the Envoy code made it a little difficult to piece this project together. For example, _all_ the Envoy filter configs are in one directoy (`server/config/http/`), and _all_ the Envoy filter implementations are in a different directory (`source/common/`), and there's multiple `config` directories for non-filter config stuff, etc. so it felt like a scavenger hunt to get the complete image of what all 1 filter needs. This organization makes sense for the size of Envoy's project, but again makes it difficult to piece together everything that, for example, the buffer filter does.
 - Despite the above 2 "complaints", Envoy does provide a very clean API to work with. I found this to be a much easier exercise than implementing an Nginx module, which took a day-long workshop and I'm still not confident in my Nginx module development.
 - I noticed there's some scripts in `envoy/tools/` such as `stack_decode.py` that may have been helpful in debugging but I couldn't figure out how to get them to work.
 - The bazel build procedure is pretty slick. Props to the Envoy team!
