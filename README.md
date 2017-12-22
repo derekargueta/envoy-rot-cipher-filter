@@ -167,7 +167,7 @@ static ProtobufTypes::MessagePtr translateToFactoryConfig(const ProtoMessage& en
 }
 ```
 
-I wasn't getting the nullptr error message so the config wasn't coming back null... WAIT. `createEmptyConfigProto`? That function is required by the abstract class and I remember pasting in some code for it... I hadn't thought much of that function and just pasted what the `envoy-example-filter` code had, which is `return ProtobufTypes::MessagePtr{new Envoy::ProtobufWkt::Empty()}`. If the empty message is _not_ of type `example::RotCipher`, then yeah there would be issues in casting it to a `Protobuf::Message` and then to an `example::RotCipher`. I checked some built-in Envoy filters that had non-emtpy configurations and sure enough, they return an empty instance of the generated protobuf config.
+I wasn't getting the nullptr error message so the config wasn't coming back null... WAIT. `createEmptyConfigProto`? That function is required by the abstract class and I remember pasting in some code for it... I hadn't thought much of that function and just pasted what the `envoy-example-filter` code had, which is `return ProtobufTypes::MessagePtr{new Envoy::ProtobufWkt::Empty()}`. If the empty message is _not_ of type `example::RotCipher`, then yeah there would be issues in casting it to a `Protobuf::Message` and then to an `example::RotCipher`. I checked some built-in Envoy filters that had non-empty configurations and sure enough, they return an empty instance of the generated protobuf config.
 
 RateLimit config
 ```cpp
