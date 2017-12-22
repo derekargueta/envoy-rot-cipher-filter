@@ -107,8 +107,8 @@ All generated protobuf messages subclass `Protobuf::Message` (which is the type 
 
 I had gone over the configuration multiple times and knew it was correct based on playing with other filters.
 At the end my wits, I started throwing print statements into the Envoy source code.
-I started with the HTTPConnectionManager right after it logs what filter it's processing, since the debug log kindly outputs what line it is at :)
-This is at the end of the constructor, `HttpConnectionManagerConfig::HttpConnectionManagerConfig(const envoy::api::v2::filter::network::HttpConnectionManager&, FactoryContext&, Http::DateProvider&, Router::RouteConfigProviderManager&)` which has the following code.
+I started with the `HttpConnectionManagerConfig` right after it logs what filter it's processing, since the debug log kindly outputs what line it is at :)
+This is at the [end of the constructor](https://github.com/envoyproxy/envoy/blob/9ed62923a8ff6745407046c4451ce757348d966f/source/server/config/network/http_connection_manager.cc#L221) which has the following code.
 
 ```cpp
 const auto& filters = config.http_filters();
