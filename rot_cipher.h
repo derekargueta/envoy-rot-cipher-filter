@@ -20,7 +20,7 @@ public:
   void setDecoderFilterCallbacks(StreamDecoderFilterCallbacks& callbacks) override;
 
 private:
-  StreamDecoderFilterCallbacks* decoder_callbacks_;
+  StreamDecoderFilterCallbacks* decoder_callbacks_{};
 
   std::string rotateText(std::string text);
 
