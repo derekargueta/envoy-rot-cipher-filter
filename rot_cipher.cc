@@ -2,8 +2,6 @@
 
 #include "rot_cipher.h"
 
-#include "gen/rot_cipher.pb.h"
-
 #include "server/config/network/http_connection_manager.h"
 
 namespace Envoy {
@@ -33,20 +31,6 @@ std::string RotCipherFilter::rotateText(std::string text) {
 }
 
 ///////////////// constructors /////////////////////////////////////////////
-RotCipherFilter::RotCipherFilter() {
-  rot_value_ = 13;  // caesar cipher
-  rot_header_ = "x-rot";  // default rotation header
-}
-
-RotCipherFilter::RotCipherFilter(example::RotCipher config) {
-  rot_value_ = config.rot_value();
-  rot_header_ = config.rot_header();
-}
-
-RotCipherFilter::RotCipherFilter(const Json::Object& config) {
-  rot_value_ = config.getInteger("rot_value");
-  rot_header_ = config.getString("rot_header");
-}
 
 RotCipherFilter::RotCipherFilter(int rot_value, std::string rot_header) :
     rot_value_(rot_value), rot_header_(rot_header) {}

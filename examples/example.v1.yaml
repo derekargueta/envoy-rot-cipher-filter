@@ -15,7 +15,7 @@ listeners:
             timeout_ms: 0
             cluster: service
       filters:
-      - { type: decoder, name: rot_cipher, config: {} }
+      - { type: decoder, name: rot_cipher, config: { rot_value: 13, rot_header: x-rot } }
       - { type: decoder, name: router, config: {} }
 
 admin:

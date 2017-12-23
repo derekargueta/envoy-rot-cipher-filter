@@ -14,27 +14,32 @@ namespace Envoy {
 namespace Server {
 namespace Configuration {
 
-HttpFilterFactoryCb RotCipherConfig::createFilterFactory(const Json::Object&, const std::string&,
-                                          FactoryContext&) {
+HttpFilterFactoryCb RotCipherConfig::createFilterFactory(const Json::Object& obj,
+                                                         const std::string&,
+                                                         FactoryContext&) {
 
-  // in this example we manually parse the JSON since it's one field. In the
+  // in this example we manually parse the JSON since it's two fields. In the
   // official Envoy source they write "translation" functions. See
   // source/common/config/filter_json.cc
-  return [](Http::FilterChainFactoryCallbacks& callbacks) -> void {
+  int rot_value = obj.getInteger("rot_value", 13);
+  std::string rot_header = obj.getString("rot_header", "x-rot");
+  return [rot_value, rot_header](Http::FilterChainFactoryCallbacks& callbacks) -> void {
     callbacks.addStreamDecoderFilter(
-      Http::StreamDecoderFilterSharedPtr{new Http::RotCipherFilter()});
+      Http::StreamDecoderFilterSharedPtr{new Http::RotCipherFilter(rot_value, rot_header)});
   };
 }
 
 HttpFilterFactoryCb RotCipherConfig::createFilterFactoryFromProto(const Protobuf::Message& proto_config,
-                                                   const std::string&,
-                                                   FactoryContext&) {
+                                                                  const std::string&,
+                                                                  FactoryContext&) {
   
   const auto& typed_config = dynamic_cast<const example::RotCipher&>(proto_config);
 
-  return [typed_config](Http::FilterChainFactoryCallbacks& callbacks) -> void {
+  int rot_value = typed_config.rot_value();
+  std::string rot_header = typed_config.rot_header();
+  return [rot_value, rot_header](Http::FilterChainFactoryCallbacks& callbacks) -> void {
     callbacks.addStreamDecoderFilter(
-      Http::StreamDecoderFilterSharedPtr{new Http::RotCipherFilter(typed_config)});
+      Http::StreamDecoderFilterSharedPtr{new Http::RotCipherFilter(rot_value, rot_header)});
   };
 }
 

@@ -2,8 +2,6 @@
 
 #include <string>
 
-#include "gen/rot_cipher.pb.h"
-
 #include "server/config/network/http_connection_manager.h"
 
 namespace Envoy {
@@ -11,9 +9,6 @@ namespace Http {
 
 class RotCipherFilter : public StreamDecoderFilter {
 public:
-  RotCipherFilter();
-  RotCipherFilter(example::RotCipher);
-  RotCipherFilter(const Json::Object&);
   RotCipherFilter(int rot_value, std::string rot_header);
   ~RotCipherFilter();
 
