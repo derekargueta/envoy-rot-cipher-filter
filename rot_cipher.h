@@ -9,7 +9,7 @@ namespace Http {
 
 class RotCipherFilter : public StreamDecoderFilter {
 public:
-  RotCipherFilter(int rot_value, std::string rot_header);
+  RotCipherFilter(int rot_value, const std::string& rot_header);
   ~RotCipherFilter();
 
   void onDestroy() override;

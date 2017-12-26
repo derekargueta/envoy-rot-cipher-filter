@@ -32,7 +32,7 @@ std::string RotCipherFilter::rotateText(std::string text) {
 
 ///////////////// constructors /////////////////////////////////////////////
 
-RotCipherFilter::RotCipherFilter(int rot_value, std::string rot_header) :
+RotCipherFilter::RotCipherFilter(int rot_value, const std::string& rot_header) :
     rot_value_(rot_value), rot_header_(rot_header) {}
 ///////////////////////////////////////////////////////////////////////////////
 

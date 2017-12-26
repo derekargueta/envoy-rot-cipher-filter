@@ -40,9 +40,8 @@ envoy_cc_library(
 )
 
 envoy_cc_test(
-    name = "rot_cipher_integration_test",
-    srcs = ["rot_cipher_integration_test.cc"],
-    data = [":envoy.conf"],
+    name = "rot_cipher_test",
+    srcs = ["rot_cipher_test.cc"],
     repository = "@envoy",
     deps = [
         "//gen:rot_cipher_protos",
