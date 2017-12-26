@@ -4,7 +4,7 @@
 
 #include "envoy/server/filter_config.h"
 
-#include "gen/rot_cipher.pb.h"
+#include "rot_cipher.pb.h"
 
 namespace Envoy {
 namespace Server {

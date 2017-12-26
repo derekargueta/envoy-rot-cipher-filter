@@ -8,7 +8,7 @@
 #include "common/protobuf/utility.h"
 #include "envoy/registry/registry.h"
 
-#include "gen/rot_cipher.pb.h"
+#include "rot_cipher.pb.h"
 
 namespace Envoy {
 namespace Server {

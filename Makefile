@@ -1,9 +1,4 @@
-
-compile/proto:
-	mkdir -p gen
-	protoc --cpp_out=gen rot_cipher.proto
-
-compile: compile/proto
+compile:
 	bazel build //:envoy
 
 test:
