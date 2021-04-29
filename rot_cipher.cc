@@ -2,8 +2,6 @@
 
 #include "rot_cipher.h"
 
-#include "server/config/network/http_connection_manager.h"
-
 namespace Envoy {
 namespace Http {
 
@@ -42,23 +40,25 @@ void RotCipherFilter::onDestroy() {}
 
 /**
  * Here's where the magic happens. Envoy works in ordered filter chains, based
- * on the order in the configuration file. When it's this filter's turn to 
+ * on the order in the configuration file. When it's this filter's turn to
  * process the request (going upstream), we get this call for the headers
  */
-FilterHeadersStatus RotCipherFilter::decodeHeaders(HeaderMap& headers, bool) {
+FilterHeadersStatus RotCipherFilter::decodeHeaders(RequestHeaderMap& headers, bool) {
   // static b/c it's the same everytime, so once it's initialized let's just
   // keep it around
   static LowerCaseString header_key(rot_header_);
 
   // extract the header
-  const HeaderEntry* header_entry = headers.get(header_key);
-  
+  const HeaderMap::GetResult header_result = headers.get(header_key);
+
+
   // if it's `nullptr`, then the header value isn't defined. If we don't have
   // this check, then Envoy will segfault if the request doesn't have the header
-  if (header_entry != nullptr) {
-    std::string thingy(header_entry->value().c_str());
+  if (!header_result.empty()) {
+    const HeaderEntry* header_entry = header_result[0];
+    std::string thingy(header_entry->value().getStringView());
     std::string new_value = rotateText(thingy);
-    
+
     // we have to remove the header, otherwise we'll end up with duplicate
     // headers, as adding a header with the same name only appends, doesn't
     // replace.
@@ -76,7 +76,7 @@ FilterDataStatus RotCipherFilter::decodeData(Buffer::Instance&, bool) {
   return FilterDataStatus::Continue;
 }
 
-FilterTrailersStatus RotCipherFilter::decodeTrailers(HeaderMap&) {
+FilterTrailersStatus RotCipherFilter::decodeTrailers(RequestTrailerMap&) {
   return FilterTrailersStatus::Continue;
 }
 //////////////////////////////////////////////////////////////////////////

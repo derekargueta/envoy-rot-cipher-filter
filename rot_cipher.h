@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "server/config/network/http_connection_manager.h"
+#include "envoy/http/filter.h"
 
 namespace Envoy {
 namespace Http {
@@ -14,9 +14,9 @@ public:
 
   void onDestroy() override;
 
-  FilterHeadersStatus decodeHeaders(HeaderMap& headers, bool) override;
+  FilterHeadersStatus decodeHeaders(RequestHeaderMap& headers, bool) override;
   FilterDataStatus decodeData(Buffer::Instance&, bool) override;
-  FilterTrailersStatus decodeTrailers(HeaderMap&) override;
+  FilterTrailersStatus decodeTrailers(RequestTrailerMap&) override;
   void setDecoderFilterCallbacks(StreamDecoderFilterCallbacks& callbacks) override;
 
 private:

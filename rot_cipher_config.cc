@@ -11,43 +11,25 @@
 #include "rot_cipher.pb.h"
 
 namespace Envoy {
-namespace Server {
-namespace Configuration {
+namespace Extensions {
+namespace HttpFilters {
+namespace RotCipher {
 
-HttpFilterFactoryCb RotCipherConfig::createFilterFactory(const Json::Object& obj,
-                                                         const std::string&,
-                                                         FactoryContext&) {
+Http::FilterFactoryCb RotCipherConfig::createFilterFactoryFromProtoTyped(const example::RotCipher& proto_config,
+                                                                  const std::string& /*stats_prefix*/,
+                                                                  Server::Configuration::FactoryContext& /*context*/) {
 
-  // in this example we manually parse the JSON since it's two fields. In the
-  // official Envoy source they write "translation" functions. See
-  // source/common/config/filter_json.cc
-  int rot_value = obj.getInteger("rot_value", 13);
-  std::string rot_header = obj.getString("rot_header", "x-rot");
+  int rot_value = proto_config.rot_value();
+  std::string rot_header = proto_config.rot_header();
   return [rot_value, rot_header](Http::FilterChainFactoryCallbacks& callbacks) -> void {
     callbacks.addStreamDecoderFilter(
       Http::StreamDecoderFilterSharedPtr{new Http::RotCipherFilter(rot_value, rot_header)});
   };
 }
 
-HttpFilterFactoryCb RotCipherConfig::createFilterFactoryFromProto(const Protobuf::Message& proto_config,
-                                                                  const std::string&,
-                                                                  FactoryContext&) {
-  
-  const auto& typed_config = dynamic_cast<const example::RotCipher&>(proto_config);
+REGISTER_FACTORY(RotCipherConfig, Server::Configuration::NamedHttpFilterConfigFactory);
 
-  int rot_value = typed_config.rot_value();
-  std::string rot_header = typed_config.rot_header();
-  return [rot_value, rot_header](Http::FilterChainFactoryCallbacks& callbacks) -> void {
-    callbacks.addStreamDecoderFilter(
-      Http::StreamDecoderFilterSharedPtr{new Http::RotCipherFilter(rot_value, rot_header)});
-  };
-}
-
-  
-// this is required for the filter to get registered with the Http connection
-// manager, though I'm not sure how the internals of this works.
-static Registry::RegisterFactory<RotCipherConfig, NamedHttpFilterConfigFactory> register_;
-
-} // Configuration
-} // Server
+} // RotCipher
+} // HttpFilters
+} // Extensions
 } // Envoy

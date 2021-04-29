@@ -2,35 +2,29 @@
 
 #include <string>
 
-#include "envoy/server/filter_config.h"
+#include "envoy/server/factory_context.h"
+
+#include "extensions/filters/http/common/factory_base.h"
 
 #include "rot_cipher.pb.h"
+#include "rot_cipher.pb.validate.h"
 
 namespace Envoy {
-namespace Server {
-namespace Configuration {
+namespace Extensions {
+namespace HttpFilters {
+namespace RotCipher {
 
-class RotCipherConfig : public NamedHttpFilterConfigFactory {
+class RotCipherConfig : public Common::FactoryBase<example::RotCipher> {
 public:
-  HttpFilterFactoryCb createFilterFactory(const Json::Object&, const std::string&,
-                                          FactoryContext&) override;
+  RotCipherConfig() : FactoryBase("rot_cipher") {}
 
-  HttpFilterFactoryCb createFilterFactoryFromProto(const Protobuf::Message&,
+private:
+  Http::FilterFactoryCb createFilterFactoryFromProtoTyped(const example::RotCipher&,
                                                    const std::string&,
-                                                   FactoryContext&) override;
-
-  // this is important! if you just use Envoy::ProtobufWkt::Empty()
-  // then the config won't be able to get cast to your protobuf type and you'll
-  // get an error message like:
-  // "Unable to parse JSON as proto (INVALID_ARGUMENT:: Cannot find field.):"
-  ProtobufTypes::MessagePtr createEmptyConfigProto() override {
-    return ProtobufTypes::MessagePtr{new example::RotCipher()};
-  }
-
-  std::string name() override { return "rot_cipher"; }
-
+                                                   Server::Configuration::FactoryContext&) override;
 };
 
-} // Configuration
-} // Server
-} // Envoy
+} // namespace RotCipher
+} // namespace HttpFilters
+} // namespace Extensions
+} // namespace Envoy
